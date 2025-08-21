@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: payments
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: 'https://github.com/ccwithzee/platform-deploy.git'
+    targetRevision: main
+    path: charts/payments
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: orders
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

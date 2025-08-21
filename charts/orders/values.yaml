@@ -1,0 +1,38 @@
+image:
+  repository: microservices-app-orders
+  tag: "latest"
+  pullPolicy: Never
+
+replicaCount: 2
+
+resources:
+  requests: { cpu: "100m", memory: "128Mi" }
+  limits: { cpu: "500m", memory: "256Mi" }
+
+service:
+  type: ClusterIP
+  port: 8080
+
+ingress:
+  enabled: false
+
+env:
+  - name: LOG_LEVEL
+    value: info
+
+livenessProbe:
+  path: /healthz
+  port: 8080
+readinessProbe:
+  path: /healthz
+  port: 8080
+
+hpa:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 60
+
+pdb:
+  enabled: true
+  minAvailable: 1
