@@ -3,10 +3,10 @@
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
-  name: {{ include "users.fullname" . }}
+  name: {{include "users.fullname" . }}
 spec:
-  minAvailable: {{ .Values.pdb.minAvailable }}
+  minAvailable: {{.Values.pdb.minAvailable }}
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ include "users.name" . }}
+      app.kubernetes.io/name: {{include "users.name" . }}
 {{- end }}

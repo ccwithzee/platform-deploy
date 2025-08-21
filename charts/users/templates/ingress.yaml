@@ -3,19 +3,19 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ include "users.fullname" . }}
+  name: {{include "users.fullname" . }}
   annotations:
     kubernetes.io/ingress.class: nginx
 spec:
   rules:
-    - host: {{ .Values.ingress.host }}
+    - host: {{.Values.ingress.host }}
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: {{ include "users.fullname" . }}
+                name: {{include "users.fullname" . }}
                 port:
-                  number: {{ .Values.service.port }}
+                  number: {{.Values.service.port }}
 {{- end }}
