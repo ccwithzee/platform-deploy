@@ -1,0 +1,83 @@
+name: Deploy Checks (Helm + Kubeconform)
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    env:
+      KUBE_VERSION: "1.29.0" # set to your cluster version
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # YAML style/structure checks
+      - name: YAML Lint
+        uses: ibiqlik/action-yamllint@v3
+        with:
+          config_data: |
+            extends: default
+            rules:
+              line-length: {max: 160}
+              truthy: disable
+
+      # Helm setup + lint each chart
+      - name: Setup Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.14.4
+
+      - name: Helm lint (all charts)
+        run: |
+          set -euo pipefail
+          for chart in charts/*; do
+            if [ -f "$chart/Chart.yaml" ]; then
+              echo "::group::helm lint $(basename "$chart")"
+              helm lint "$chart"
+              echo "::endgroup::"
+            fi
+          done
+
+      # Install Go and build kubeconform (fast & reliable)
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+
+      - name: Install kubeconform
+        run: |
+          set -euo pipefail
+          go install github.com/yannh/kubeconform/cmd/kubeconform@latest
+          echo "$HOME/go/bin" >> $GITHUB_PATH
+
+      # Render Helm charts and validate against Kubernetes schemas
+      - name: Render all charts → rendered/*.yaml
+        run: |
+          set -euo pipefail
+          mkdir -p rendered
+          for chart in charts/*; do
+            if [ -f "$chart/Chart.yaml" ]; then
+              name=$(basename "$chart")
+              # Provide safe defaults so templating never fails if image values are missing
+              helm template "$name" "$chart" \
+                --set image.repository=nginx \
+                --set image.tag=stable \
+                > "rendered/${name}.yaml"
+              echo "Rendered $name → rendered/${name}.yaml"
+            fi
+          done
+          ls -lh rendered
+
+      - name: kubeconform validate (strict)
+        run: |
+          set -euo pipefail
+          kubeconform -strict -summary -kubernetes-version ${KUBE_VERSION} rendered/*.yaml
+
