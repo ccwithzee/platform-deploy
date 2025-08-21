@@ -1,3 +1,5 @@
+---
+
 name: Deploy Checks (Helm + Kubeconform)
 
 on:
@@ -80,4 +82,3 @@ jobs:
         run: |
           set -euo pipefail
           kubeconform -strict -summary -kubernetes-version ${KUBE_VERSION} rendered/*.yaml
-

@@ -1,10 +1,9 @@
-for svc in api-gateway users orders payments; do
-cat > $svc/templates/ingress.yaml <<EOF
+---
 {{- if .Values.ingress.enabled }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ include "$svc.fullname" . }}
+  name: {{ include "orders.fullname" . }}
   annotations:
     kubernetes.io/ingress.class: nginx
 spec:
@@ -16,9 +15,7 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: {{ include "$svc.fullname" . }}
+                name: {{ include "orders.fullname" . }}
                 port:
                   number: {{ .Values.service.port }}
 {{- end }}
-EOF
-done

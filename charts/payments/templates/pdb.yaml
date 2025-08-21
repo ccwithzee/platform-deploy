@@ -1,15 +1,12 @@
-for svc in api-gateway users orders payments; do
-cat > $svc/templates/pdb.yaml <<EOF
+---
 {{- if .Values.pdb.enabled }}
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
-  name: {{ include "$svc.fullname" . }}
+  name: {{ include "payments.fullname" . }}
 spec:
   minAvailable: {{ .Values.pdb.minAvailable }}
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ include "$svc.name" . }}
+      app.kubernetes.io/name: {{ include "payments.name" . }}
 {{- end }}
-EOF
-done

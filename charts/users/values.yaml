@@ -1,3 +1,4 @@
+---
 image:
   repository: microservices-app-users
   tag: "latest"
