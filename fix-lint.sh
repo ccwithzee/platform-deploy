@@ -2,9 +2,11 @@
 set -euo pipefail
 
 CHARTS=("api-gateway" "orders" "payments" "users")
-TMP_DIR="$(mktemp -d)"
+TMP_DIR="/tmp/helm-lint"   # <<< fixed: use a stable dir kubeconform can read
 ARGOCD_DIR="argocd/apps"
 EXIT_CODE=0
+
+mkdir -p "$TMP_DIR"
 
 echo ">>> Rendering Helm charts..."
 for chart in "${CHARTS[@]}"; do
@@ -32,7 +34,8 @@ for file in "$TMP_DIR"/*; do
     fi
 done
 
-rm -rf "$TMP_DIR"
+# 🚫 DO NOT delete TMP_DIR, kubeconform needs these files
+# rm -rf "$TMP_DIR"
 
 if [ $EXIT_CODE -eq 0 ]; then
     echo "✅ All Helm charts and ArgoCD YAMLs passed lint!"
