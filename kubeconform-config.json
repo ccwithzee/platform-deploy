@@ -1,0 +1,6 @@
+{
+  "schema-locations": [
+    "default",
+    "https://raw.githubusercontent.com/argoproj/argo-cd/master/manifests/crds/{{ .ResourceKind }}-crd.yaml"
+  ]
+}
