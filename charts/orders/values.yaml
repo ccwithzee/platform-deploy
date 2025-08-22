@@ -16,6 +16,9 @@ service:
 
 ingress:
   enabled: false
+  annotations: {}
+  rules: []
+  tls: []
 
 env:
   - name: LOG_LEVEL

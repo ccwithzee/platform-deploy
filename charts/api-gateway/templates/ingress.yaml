@@ -1,21 +1,27 @@
----
 {{- if .Values.ingress.enabled }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{include "api-gateway.fullname" . }}
+  name: {{ include "api-gateway.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "api-gateway.name" . }}
   annotations:
-    kubernetes.io/ingress.class: nginx
+{{- if .Values.ingress.annotations }}
+{{ toYaml .Values.ingress.annotations | indent 4 }}
+{{- else }}
+{}
+{{- end }}
 spec:
   rules:
-    - host: {{.Values.ingress.host }}
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: {{include "api-gateway.fullname" . }}
-                port:
-                  number: {{.Values.service.port }}
+{{- if .Values.ingress.rules }}
+{{ toYaml .Values.ingress.rules | indent 4 }}
+{{- else }}
+[]
+{{- end }}
+  tls:
+{{- if .Values.ingress.tls }}
+{{ toYaml .Values.ingress.tls | indent 4 }}
+{{- else }}
+[]
+{{- end }}
 {{- end }}

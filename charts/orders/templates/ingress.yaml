@@ -1,21 +1,16 @@
----
 {{- if .Values.ingress.enabled }}
+---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{include "orders.fullname" . }}
+  name: {{ include "orders.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "orders.name" . }}
   annotations:
-    kubernetes.io/ingress.class: nginx
+{{ toYaml .Values.ingress.annotations | indent 4 }}
 spec:
   rules:
-    - host: {{.Values.ingress.host }}
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: {{include "orders.fullname" . }}
-                port:
-                  number: {{.Values.service.port }}
+{{ toYaml .Values.ingress.rules | indent 4 }}
+  tls:
+{{ toYaml .Values.ingress.tls | indent 4 }}
 {{- end }}

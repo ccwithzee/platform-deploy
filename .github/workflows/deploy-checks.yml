@@ -1,12 +1,11 @@
 ---
-
 name: Deploy Checks (Helm + Kubeconform)
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 permissions:
   contents: read
@@ -15,70 +14,57 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     env:
-      KUBE_VERSION: "1.29.0" # set to your cluster version
+      KUBE_VERSION: "1.29.0"
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # YAML style/structure checks
-      - name: YAML Lint
-        uses: ibiqlik/action-yamllint@v3
-        with:
-          config_data: |
-            extends: default
-            rules:
-              line-length: {max: 160}
-              truthy: disable
-
-      # Helm setup + lint each chart
+      # Setup Helm with cache
       - name: Setup Helm
         uses: azure/setup-helm@v4
         with:
           version: v3.14.4
+      - name: Cache Helm plugins
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/helm
+          key: helm-cache-${{ hashFiles('charts/**/Chart.yaml') }}
 
-      - name: Helm lint (all charts)
+      # Setup Prettier & Yamllint with cache
+      - name: Setup Prettier & Yamllint
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.npm
+            ~/.local/bin
+          key: yaml-tools-${{ runner.os }}-prettier-${{ hashFiles('fix-lint.sh') }}
         run: |
-          set -euo pipefail
-          for chart in charts/*; do
-            if [ -f "$chart/Chart.yaml" ]; then
-              echo "::group::helm lint $(basename "$chart")"
-              helm lint "$chart"
-              echo "::endgroup::"
-            fi
-          done
+          sudo npm install -g prettier
+          sudo apt-get update && sudo apt-get install -y yamllint csplit
 
-      # Install Go and build kubeconform (fast & reliable)
+      # Run fix-lint.sh (renders charts, lints YAML, checks empty values)
+      - name: Run YAML Lint + Helm render checks
+        run: |
+          chmod +x ./fix-lint.sh
+          ./fix-lint.sh
+
+      # Setup Go for kubeconform
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
           go-version: "1.22"
 
+      # Install kubeconform
       - name: Install kubeconform
         run: |
-          set -euo pipefail
           go install github.com/yannh/kubeconform/cmd/kubeconform@latest
           echo "$HOME/go/bin" >> $GITHUB_PATH
 
-      # Render Helm charts and validate against Kubernetes schemas
-      - name: Render all charts → rendered/*.yaml
-        run: |
-          set -euo pipefail
-          mkdir -p rendered
-          for chart in charts/*; do
-            if [ -f "$chart/Chart.yaml" ]; then
-              name=$(basename "$chart")
-              # Provide safe defaults so templating never fails if image values are missing
-              helm template "$name" "$chart" \
-                --set image.repository=nginx \
-                --set image.tag=stable \
-                > "rendered/${name}.yaml"
-              echo "Rendered $name → rendered/${name}.yaml"
-            fi
-          done
-          ls -lh rendered
-
+      # Run kubeconform on fully linted YAMLs
       - name: kubeconform validate (strict)
         run: |
           set -euo pipefail
+          mkdir -p rendered
+          cp /tmp/helm-lint/* rendered/
           kubeconform -strict -summary -kubernetes-version ${KUBE_VERSION} rendered/*.yaml
