@@ -25,20 +25,24 @@ jobs:
         uses: azure/setup-helm@v4
         with:
           version: v3.14.4
+
       - name: Cache Helm plugins
         uses: actions/cache@v3
         with:
           path: ~/.cache/helm
           key: helm-cache-${{ hashFiles('charts/**/Chart.yaml') }}
 
-      # Setup Prettier & Yamllint with cache
-      - name: Setup Prettier & Yamllint
+      # Setup Prettier & Yamllint cache
+      - name: Cache Prettier & Yamllint
         uses: actions/cache@v3
         with:
           path: |
             ~/.npm
             ~/.local/bin
           key: yaml-tools-${{ runner.os }}-prettier-${{ hashFiles('fix-lint.sh') }}
+
+      # Install Prettier & Yamllint
+      - name: Install Prettier & Yamllint
         run: |
           sudo npm install -g prettier
           sudo apt-get update && sudo apt-get install -y yamllint csplit
