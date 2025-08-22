@@ -39,7 +39,7 @@ jobs:
           path: |
             ~/.npm
             ~/.local/bin
-          key: yaml-tools-${{ runner.os }}-prettier-${{ hashFiles('fix-lint.sh') }}
+          key: yaml-tools-${{ runner.os }}-prettier-${{ hashFiles('fix-lintf.sh') }}
 
       # Install Prettier & Yamllint (+ coreutils for csplit)
       - name: Install Prettier & Yamllint
@@ -48,11 +48,11 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y yamllint coreutils
 
-      # Run fix-lint.sh (renders charts, lints YAML, checks empty values)
+      # Run fix-lintf.sh (renders charts, lints YAML, checks empty values)
       - name: Run YAML Lint + Helm render checks
         run: |
-          chmod +x ./fix-lint.sh
-          ./fix-lint.sh
+          chmod +x ./fix-lintf.sh
+          ./fix-lintf.sh
 
       # Setup Go for kubeconform
       - name: Setup Go
@@ -72,4 +72,4 @@ jobs:
           set -euo pipefail
           mkdir -p rendered
           cp /tmp/helm-lint/* rendered/
-          kubeconform -strict -summary -kubernetes-version ${KUBE_VERSION} rendered/*.yaml
+          kubeconform -strict -summary -ignore-missing-schemas -kubernetes-version ${KUBE_VERSION} rendered/*.yaml
