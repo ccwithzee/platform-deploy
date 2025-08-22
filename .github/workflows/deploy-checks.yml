@@ -70,6 +70,4 @@ jobs:
       - name: kubeconform validate (strict)
         run: |
           set -euo pipefail
-          mkdir -p rendered
-          cp /tmp/helm-lint/* rendered/
           kubeconform -strict -summary -ignore-missing-schemas -kubernetes-version ${KUBE_VERSION} rendered/*.yaml
