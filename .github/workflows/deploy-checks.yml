@@ -45,7 +45,7 @@ jobs:
       - name: Install Prettier & Yamllint
         run: |
           sudo npm install -g prettier
-          sudo apt-get update && sudo apt-get install -y yamllint csplit
+          sudo apt-get update && sudo apt-get install -y yamllint
 
       # Run fix-lint.sh (renders charts, lints YAML, checks empty values)
       - name: Run YAML Lint + Helm render checks
