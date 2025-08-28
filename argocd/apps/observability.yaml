@@ -13,7 +13,7 @@ spec:
     path: charts/observability
   destination:
     server: 'https://kubernetes.default.svc'
-    namespace: observability
+    namespace:  microservices
   syncPolicy:
     automated:
       prune: true

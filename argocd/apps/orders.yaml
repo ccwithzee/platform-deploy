@@ -13,7 +13,7 @@ spec:
     path: charts/orders
   destination:
     server: 'https://kubernetes.default.svc'
-    namespace: orders
+    namespace:  microservices
   syncPolicy:
     automated:
       prune: true

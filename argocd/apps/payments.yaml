@@ -13,7 +13,7 @@ spec:
     path: charts/payments
   destination:
     server: 'https://kubernetes.default.svc'
-    namespace: orders
+    namespace:  microservices
   syncPolicy:
     automated:
       prune: true

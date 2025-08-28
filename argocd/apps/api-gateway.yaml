@@ -12,7 +12,7 @@ spec:
     path: charts/api-gateway
   destination:
     server: 'https://kubernetes.default.svc'
-    namespace: api-gateway
+    namespace:  microservices
   syncPolicy:
     automated:
       prune: true
