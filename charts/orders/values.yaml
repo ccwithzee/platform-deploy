@@ -1,8 +1,8 @@
 ---
 image:
-  repository: microservices-app-orders
+  repository: 183150676957.dkr.ecr.eu-north-1.amazonaws.com/orders
   tag: "latest"
-  pullPolicy: Never
+  pullPolicy: Always
 
 replicaCount: 2
 
